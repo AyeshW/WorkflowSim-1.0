@@ -21,10 +21,7 @@ import org.cloudbus.cloudsim.Log;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
-import org.workflowsim.clustering.BasicClustering;
-import org.workflowsim.clustering.BlockClustering;
-import org.workflowsim.clustering.HorizontalClustering;
-import org.workflowsim.clustering.VerticalClustering;
+import org.workflowsim.clustering.*;
 import org.workflowsim.clustering.balancing.BalancedClustering;
 import org.workflowsim.utils.ClusteringParameters;
 import org.workflowsim.utils.Parameters;
@@ -148,7 +145,8 @@ public final class ClusteringEngine extends SimEntity {
                     this.engine = new HorizontalClustering(params.getClustersNum(), 0);
                 } // if clusters.size is set in configuration file
                 else if (params.getClustersSize() != 0) {
-                    this.engine = new HorizontalClustering(0, params.getClustersSize());
+//                    this.engine = new HorizontalClustering(0, params.getClustersSize());
+                    this.engine = new WPAClustering(0, params.getClustersSize());
                 }
                 break;
             /**
@@ -285,7 +283,7 @@ public final class ClusteringEngine extends SimEntity {
 
     /**
      * Overrides this method when making a new and different type of Broker.
-     * This method is called by {@link #body()} for incoming unknown tags.
+     * This method is called by {@link #()} for incoming unknown tags.
      *
      * @param ev a SimEvent object
      * @pre ev != null

@@ -57,8 +57,8 @@ public class BalancedClusteringExample1 extends HorizontalClusteringExample1 {
              * TODO(chenww05): delete in the future
              *
              */
-            String code = "i";
-            String daxPath = "/Users/weiweich/NetBeansProjects/WorkflowSim-1.0/config/dax/Montage_100.xml";
+            String code = "d";
+            String daxPath = "/Users/randika/Documents/WorkflowSim-1.0/config/dax/Epigenomics_100.xml";
             double c_delay = 0.0, q_delay = 0.0, e_delay = 0.0, p_delay = 0.0;
             int interval = 0;
 
@@ -153,7 +153,7 @@ public class BalancedClusteringExample1 extends HorizontalClusteringExample1 {
              * Balancing (HDB) i: Horizontal Impact Factor Balancing (HIFB) h:
              * Horizontal Random Balancing , the original horizontal clustering
              */
-            ClusteringParameters cp = new ClusteringParameters(20, 0, method, code);
+            ClusteringParameters cp = new ClusteringParameters(5, 0, method, code);
 
             /**
              * Initialize static parameters

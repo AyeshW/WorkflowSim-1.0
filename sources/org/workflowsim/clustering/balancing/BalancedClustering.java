@@ -25,12 +25,7 @@ import org.cloudbus.cloudsim.Log;
 import org.workflowsim.Task;
 import org.workflowsim.clustering.BasicClustering;
 import org.workflowsim.clustering.TaskSet;
-import org.workflowsim.clustering.balancing.methods.ChildAwareHorizontalClustering;
-import org.workflowsim.clustering.balancing.methods.HorizontalDistanceBalancing;
-import org.workflowsim.clustering.balancing.methods.HorizontalImpactBalancing;
-import org.workflowsim.clustering.balancing.methods.HorizontalRandomClustering;
-import org.workflowsim.clustering.balancing.methods.HorizontalRuntimeBalancing;
-import org.workflowsim.clustering.balancing.methods.VerticalBalancing;
+import org.workflowsim.clustering.balancing.methods.*;
 import org.workflowsim.clustering.balancing.metrics.DistanceVariance;
 import org.workflowsim.clustering.balancing.metrics.HorizontalRuntimeVariance;
 import org.workflowsim.clustering.balancing.metrics.ImpactFactorVariance;
@@ -343,6 +338,11 @@ public class BalancedClustering extends BasicClustering {
                         HorizontalRandomClustering h =
                                 new HorizontalRandomClustering(map, this.mTask2TaskSet, this.clusterNum);
                         h.run();
+                        break;
+                    case 'y':
+                        HYClustering hy =
+                                new HYClustering(map, this.mTask2TaskSet, this.clusterNum);
+                        hy.run();
                         break;
                     default:
                         break;

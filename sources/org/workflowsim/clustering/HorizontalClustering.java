@@ -15,13 +15,8 @@
  */
 package org.workflowsim.clustering;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
+
 import org.workflowsim.Job;
 import org.workflowsim.Task;
 
@@ -70,6 +65,7 @@ public class HorizontalClustering extends BasicClustering {
         if (clusterNum > 0 || clusterSize > 0) {
             for (Iterator it = getTaskList().iterator(); it.hasNext();) {
                 Task task = (Task) it.next();
+                System.out.println(task.getDepth());
                 int depth = task.getDepth();
                 if (!mDepth2Task.containsKey(depth)) {
                     mDepth2Task.put(depth, new ArrayList<>());
@@ -78,9 +74,20 @@ public class HorizontalClustering extends BasicClustering {
                 if (!list.contains(task)) {
                     list.add(task);
                 }
+                System.out.println(task.getDepth());
 
             }
         }
+
+        List<Task> list = mDepth2Task.get(1);
+
+        System.out.println(list.get(0).getCloudletLength());
+
+        sortTasksByLongestParent(list);
+
+        System.out.println(list.get(0).getCloudletLength());
+
+
         /**
          * if clusters.num is set.
          */
@@ -95,11 +102,24 @@ public class HorizontalClustering extends BasicClustering {
 
         updateDependencies();
         addClustDelay();
+
+
     }
 
     /**
      * Merges tasks into a fixed number of jobs.
      */
+
+    private void sortTasksByLongestParent(List<Task> tasks){
+        Collections.sort(tasks, new Comparator<Task>() {
+            @Override
+            public int compare(Task t1, Task t2) {
+                //Decreasing order
+                return (int) (t1.getCloudletLength() - t2.getCloudletLength());
+            }
+        });
+    }
+
     private void bundleClustering() {
 
         for (Map.Entry<Integer, List> pairs : mDepth2Task.entrySet()) {

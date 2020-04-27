@@ -66,6 +66,11 @@ public class Task extends Cloudlet {
      */
     private String type;
 
+    /*
+     * Weather the task is clusterd or not.
+     */
+    private boolean isAssigned;
+
     /**
      * The finish time of a task (Because cloudlet does not allow WorkflowSim to
      * update finish_time)
@@ -100,6 +105,7 @@ public class Task extends Cloudlet {
         this.fileList = new ArrayList<>();
         this.impact = 0.0;
         this.taskFinishTime = -1.0;
+        this.isAssigned = false;
     }
 
     /**
@@ -297,6 +303,14 @@ public class Task extends Cloudlet {
         return this.taskFinishTime;
     }
 
+    public boolean isAssigned() {
+        return isAssigned;
+    }
+
+    public void setAssigned(boolean assigned) {
+        isAssigned = assigned;
+    }
+
     /**
      * Gets the total cost of processing or executing this task The original
      * getProcessingCost does not take cpu cost into it also the data file in
@@ -307,6 +321,9 @@ public class Task extends Cloudlet {
      * @pre $none
      * @post $result >= 0.0
      */
+
+
+
     @Override
     public double getProcessingCost() {
         // cloudlet cost: execution cost...

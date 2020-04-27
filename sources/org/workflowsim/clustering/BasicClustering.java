@@ -241,12 +241,17 @@ public class BasicClustering implements ClusteringInterface {
                 }
             }
             for (Task childTask : task.getChildList()) {
+
                 Job childJob = (Job) getTask2Job().get(childTask);
+
                 if (!job.getChildList().contains(childJob) && childJob != job) {//avoid dublicate
                     job.addChild(childJob);
                 }
+
             }
+
         }
+        System.out.println("from update dependencies");
         getTask2Job().clear();
         getTaskList().clear();
     }
