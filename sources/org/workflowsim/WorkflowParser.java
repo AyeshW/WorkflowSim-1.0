@@ -153,6 +153,16 @@ public final class WorkflowParser {
                          * is 0.1. Otherwise CloudSim would ignore this task.
                          * BUG/#11
                          */
+                        double cores = 0;
+                        if (node.getAttributeValue("cores") != null) {
+                            String nodeCore = node.getAttributeValue("cores");
+                            cores = Double.parseDouble(nodeCore);
+                            if (cores < 0) {
+                                cores = 1;
+                            }
+                        } else {
+                            Log.printLine("Cannot find runtime for " + nodeName + ",set it to be 0");
+                        }
                         double runtime;
                         if (node.getAttributeValue("runtime") != null) {
                             String nodeTime = node.getAttributeValue("runtime");
@@ -245,7 +255,7 @@ public final class WorkflowParser {
                         Task task;
                         //In case of multiple workflow submission. Make sure the jobIdStartsFrom is consistent.
                         synchronized (this) {
-                            task = new Task(this.jobIdStartsFrom, length);
+                            task = new Task(this.jobIdStartsFrom, length, cores);
                             this.jobIdStartsFrom++;
                         }
                         task.setType(nodeType);

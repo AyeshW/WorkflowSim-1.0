@@ -51,7 +51,7 @@ public class ReclusteringEngine {
      */
     private static Job createJob(int id, Job job, long length, List taskList, boolean updateDep) {
         try {
-            Job newJob = new Job(id, length);
+            Job newJob = new Job(id, length, 1);
             newJob.setUserId(job.getUserId());
             newJob.setVmId(-1);
             newJob.setCloudletStatus(Cloudlet.CREATED);

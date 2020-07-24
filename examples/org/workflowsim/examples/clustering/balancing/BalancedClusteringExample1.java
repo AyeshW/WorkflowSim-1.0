@@ -57,8 +57,8 @@ public class BalancedClusteringExample1 extends HorizontalClusteringExample1 {
              * TODO(chenww05): delete in the future
              *
              */
-            String code = "d";
-            String daxPath = "/Users/randika/Documents/WorkflowSim-1.0/config/dax/Epigenomics_100.xml";
+            String code = "r";
+            String daxPath = "/Users/randika/Documents/WorkflowSim-1.0/config/dax/CyberShake_30.xml";
             double c_delay = 0.0, q_delay = 0.0, e_delay = 0.0, p_delay = 0.0;
             int interval = 0;
 
@@ -95,7 +95,7 @@ public class BalancedClusteringExample1 extends HorizontalClusteringExample1 {
              * the data center or the host doesn't have sufficient resources the
              * exact vmNum would be smaller than that. Take care.
              */
-            int vmNum = 20;//number of vms;
+            int vmNum = 5;//number of vms;
             File daxFile = new File(daxPath);
             if (!daxFile.exists()) {
                 Log.printLine("Warning: Please replace daxPath with the physical path in your working environment!");

@@ -77,6 +77,8 @@ public class Task extends Cloudlet {
      */
     private double taskFinishTime;
 
+    private double cores;
+
     /**
      * Allocates a new Task object. The task length should be greater than or
      * equal to 1.
@@ -90,7 +92,7 @@ public class Task extends Cloudlet {
      */
     public Task(
             final int taskId,
-            final long taskLength) {
+            final long taskLength, double cores) {
         /**
          * We do not use cloudletFileSize and cloudletOutputSize here. We have
          * added a list to task and thus we don't need a cloudletFileSize or
@@ -106,6 +108,7 @@ public class Task extends Cloudlet {
         this.impact = 0.0;
         this.taskFinishTime = -1.0;
         this.isAssigned = false;
+        this.cores = cores;
     }
 
     /**
@@ -309,6 +312,14 @@ public class Task extends Cloudlet {
 
     public void setAssigned(boolean assigned) {
         isAssigned = assigned;
+    }
+
+    public double getCores() {
+        return cores;
+    }
+
+    public void setCores(double cores) {
+        this.cores = cores;
     }
 
     /**

@@ -48,9 +48,10 @@ public class Job extends Task {
      */
     public Job(
             final int jobId,
-            final long jobLength) {
+            final long jobLength,
+            double cores) {
 
-        super(jobId, jobLength);
+        super(jobId, jobLength, cores);
         this.taskList = new ArrayList<>();
     }
 

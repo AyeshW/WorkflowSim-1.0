@@ -195,7 +195,7 @@ public final class ClusteringEngine extends SimEntity {
          * of this job to be getJobList().size() is so that the job id is the
          * next available id
          */
-        Job job = new Job(getJobList().size(), 110);
+        Job job = new Job(getJobList().size(), 110, 1);
 
         /**
          * This is a very simple implementation of stage-in job, in which we Add

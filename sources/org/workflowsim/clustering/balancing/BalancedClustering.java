@@ -344,6 +344,11 @@ public class BalancedClustering extends BasicClustering {
                                 new HYClustering(map, this.mTask2TaskSet, this.clusterNum);
                         hy.run();
                         break;
+                    case 'a':
+                        HorizontalResourceAwareBalancing hra =
+                                new HorizontalResourceAwareBalancing(map, this.mTask2TaskSet, this.clusterNum);
+                        hra.run();
+                        break;
                     default:
                         break;
                 }

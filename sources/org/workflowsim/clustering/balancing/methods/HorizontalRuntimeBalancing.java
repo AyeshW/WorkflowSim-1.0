@@ -50,6 +50,7 @@ public class HorizontalRuntimeBalancing extends BalancingMethod {
     @Override
     public void run() {
         Map<Integer, List<TaskSet>> map = getLevelMap();
+        double coreHrsWastage = 0;
         for (List<TaskSet> taskList : map.values()) {
             /**The reason why we don shuffle is very complicated. */
             long seed = System.nanoTime();
@@ -63,6 +64,7 @@ public class HorizontalRuntimeBalancing extends BalancingMethod {
                     jobList.add(new TaskSet());
                 }
                 sortListDecreasing(taskList);
+                coreHrsWastage += calculateCoreHourWastage(new ArrayList<TaskSet>(taskList));
                 for (TaskSet set : taskList) {
                     //MinHeap is required 
                     sortListIncreasing(jobList);
@@ -80,7 +82,10 @@ public class HorizontalRuntimeBalancing extends BalancingMethod {
                 //do nothing since 
             }
 
+
         }
+        System.out.println(".........................................");
+        System.out.println(coreHrsWastage);
     }
     /**
      * Sort taskSets based on their runtime
@@ -111,4 +116,38 @@ public class HorizontalRuntimeBalancing extends BalancingMethod {
         });
 
     }
+
+    public double calculateCoreHourWastage(List<TaskSet> jobs){
+        List<TaskSet> jobList = new ArrayList<>();
+        for (int i = 0; i < getClusterNum(); i++) {
+            jobList.add(new TaskSet());
+        }
+        for (TaskSet set : jobs) {
+            //MinHeap is required
+            sortListIncreasing(jobList);
+            TaskSet job = (TaskSet) jobList.get(0);
+            job.addTask(set.getTaskList());
+        }
+        double coreHourWastage = 0;
+        for (TaskSet cluster : jobList){
+            List<Task> tasks = cluster.getTaskList();
+            sortListDecreasingByCores(tasks);
+            double maxCores = tasks.get(0).getCores();
+            for (Task tsk : tasks){
+                coreHourWastage += tsk.getCloudletLength() * (maxCores - tsk.getCores());
+            }
+        }
+        return coreHourWastage;
+    }
+
+    public void sortListDecreasingByCores(List<Task> job){
+        Collections.sort(job, new Comparator<Task>() {
+            @Override
+            public int compare(Task t1, Task t2) {
+                //Decreasing order
+                return (int) (t2.getCores() - t1.getCores());
+            }
+        });
+    }
+
 }
