@@ -29,6 +29,7 @@ public class HYClustering extends HorizontalImpactBalancing {
      *
      * @param taskList
      */
+    @Override
     public void process(List<TaskSet> taskList) {
 
         if (taskList.size() > getClusterNum()) {

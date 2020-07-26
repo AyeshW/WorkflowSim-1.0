@@ -97,7 +97,7 @@ public class WorkflowSimBasicExample1 {
             /**
              * Should change this based on real physical path
              */
-            String daxPath = "/Users/randika/Documents/WorkflowSim-1.0/config/dax/Epigenomics_997.xml";
+            String daxPath = "/Users/randika/Documents/WorkflowSim-1.0/config/dax/CyberShake_30.xml";
             File daxFile = new File(daxPath);
             if (!daxFile.exists()) {
                 Log.printLine("Warning: Please replace daxPath with the physical path in your working environment!");

@@ -90,6 +90,8 @@ public class HorizontalImpactBalancing extends BalancingMethod {
                     getTaskMap().put(task, job);//this is enough
                 }
             }
+            System.out.println(".....................");
+            System.out.println(calculateCoreHourWastage(jobList));
             taskList.clear();
         } 
     }
@@ -251,5 +253,30 @@ public class HorizontalImpactBalancing extends BalancingMethod {
         } else {
             return taskList.get(0);
         }
+    }
+
+    public double calculateCoreHourWastage(List<TaskSet> jobList){
+
+        double coreHourWastage = 0;
+        for (TaskSet cluster : jobList){
+            List<Task> tasks = cluster.getTaskList();
+            sortListDecreasingByCores(tasks);
+            double maxCores = tasks.get(0).getCores();
+            for (Task tsk : tasks){
+                coreHourWastage += tsk.getCloudletLength() * (maxCores - tsk.getCores());
+            }
+        }
+        return coreHourWastage;
+
+    }
+
+    public void sortListDecreasingByCores(List<Task> job){
+        Collections.sort(job, new Comparator<Task>() {
+            @Override
+            public int compare(Task t1, Task t2) {
+                //Decreasing order
+                return (int) (t2.getCores() - t1.getCores());
+            }
+        });
     }
 }

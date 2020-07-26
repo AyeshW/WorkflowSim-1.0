@@ -65,6 +65,7 @@ public class HorizontalDistanceBalancing extends HorizontalImpactBalancing {
      *
      * @param taskList
      */
+    @Override
     public void process(List<TaskSet> taskList) {
 
         if (taskList.size() > getClusterNum()) {
@@ -91,6 +92,8 @@ public class HorizontalDistanceBalancing extends HorizontalImpactBalancing {
                     //impact factor is not updated
                 }
             }
+            System.out.println(".....................");
+            System.out.println(calculateCoreHourWastage(jobList));
             taskList.clear();//you sure?
         }
     }
@@ -349,6 +352,8 @@ public class HorizontalDistanceBalancing extends HorizontalImpactBalancing {
 
         return distance * 2;
     }
+
+
 }
 /*
  * An abstracion of Distance

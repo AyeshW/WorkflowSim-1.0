@@ -46,13 +46,15 @@ public class HorizontalResourceAwareBalancing extends BalancingMethod {
             if(clusters_size * getClusterNum() < taskList.size()){
                 clusters_size ++;
             }
+            double coreAvg = getAverageCores(taskList);
+            double runtimeAvg = getAverageRunTime(taskList);
             sortListDecreasing(taskList);
             for (TaskSet set : taskList) {
                 //sortListIncreasing(jobList);
                 //Log.printLine(set.getJobRuntime());
                 TaskSet job = null;
                 try{
-                    job = getCandidateTastSet(jobList, set, clusters_size);
+                    job = getCandidateTastSet(jobList, set, clusters_size, coreAvg, runtimeAvg);
                 }catch(Exception e) {
                     e.printStackTrace();
                 }
@@ -64,6 +66,8 @@ public class HorizontalResourceAwareBalancing extends BalancingMethod {
                     getTaskMap().put(task, job);//this is enough
                 }
             }
+            System.out.println(".....................");
+            System.out.println(calculateCoreHourWastage(jobList));
             taskList.clear();
         }
     }
@@ -118,13 +122,41 @@ public class HorizontalResourceAwareBalancing extends BalancingMethod {
     }
 
     private List<TaskSet> getNextPotentialTaskSets(List<TaskSet> taskList,
-                                                   TaskSet checkSet, int clusters_size){
+                                                   TaskSet checkSet, int clusters_size, double coreAvg, double runtimeAvg){
 
         Map<Double, List<TaskSet>> map = new HashMap<>();
 
-        for (TaskSet set : taskList) {
-            double factor = set.getImpactFactor();
+        Map<Double, List<TaskSet>> testMap = getClusteringFactors(taskList, checkSet, coreAvg, runtimeAvg);
 
+        List<Double> facKeys = new ArrayList<Double>(testMap.keySet());
+
+        Collections.sort(facKeys);
+
+        List<TaskSet> potentialClusters = new ArrayList<>();
+
+        for(double facKey : facKeys){
+            List<TaskSet> clusters = testMap.get(facKey);
+            for(TaskSet cluster : clusters){
+                if(cluster.getTaskList().size() < clusters_size){
+                    potentialClusters.add(cluster);
+                    break;
+                }
+            }
+            if(potentialClusters.size()>0){
+                break;
+            }
+        }
+
+        return potentialClusters;
+
+    }
+
+    private Map<Double, List<TaskSet>> getClusteringFactors(List<TaskSet> clusters, TaskSet taskSet, double coreAvg, double runtimeAvg){
+
+        Map<Double, List<TaskSet>> map = new HashMap<>();
+        Task task = taskSet.getTaskList().get(0);
+        for(TaskSet set: clusters){
+            double factor = (0.1 * Math.abs(task.getCores()-getMaxCore(set, coreAvg))) * (0.1 * Math.abs(task.getCloudletLength()-getTotalRunTime(set, runtimeAvg)));
             if(!map.containsKey(factor)){
                 map.put(factor, new ArrayList<>());
             }
@@ -133,61 +165,46 @@ public class HorizontalResourceAwareBalancing extends BalancingMethod {
                 list.add(set);
             }
         }
-        List<TaskSet> returnList = new ArrayList<> ();
-        List<TaskSet> mapSet = map.get(checkSet.getImpactFactor());
-        if(mapSet!=null && !mapSet.isEmpty()){
-            for(TaskSet set: mapSet){
-                if(set.getTaskList().size() < clusters_size){
-                    returnList.add(set);
+        return map;
+
+    }
+
+    private double getTotalRunTime(TaskSet set, double runtimeAvg){
+        double totalRunTime = runtimeAvg;
+        if(set.getTaskList()!=null){
+            for(Task task: set.getTaskList()){
+                totalRunTime+=task.getCloudletLength();
+            }
+        }
+        return totalRunTime/1000;
+    }
+
+    private double getMaxCore(TaskSet set, double coreAvg){
+        double cores = coreAvg;
+        if(set.getTaskList()!=null){
+            for (Task task: set.getTaskList()){
+                if(cores<task.getCores()){
+                    cores = task.getCores();
                 }
             }
         }
+        return cores;
+    }
 
-        if(returnList.isEmpty()){
-            List<TaskSet> zeros = map.get(0.0);
-            if(zeros!=null && !zeros.isEmpty())
-            {
-                returnList.addAll(zeros);
-            }
+    public double getAverageRunTime(List<TaskSet> set){
+        double total = 0;
+        for(TaskSet taskSet: set){
+            total+=taskSet.getTaskList().get(0).getCloudletLength();
         }
+        return total/set.size();
+    }
 
-        if(returnList.isEmpty()){
-            returnList.clear();//?
-            for (TaskSet set : taskList) {
-                if(set.getTaskList().isEmpty()){
-                    returnList.add(set);
-                    return returnList;
-                }
-            }
-            map.remove(checkSet.getImpactFactor());
-            //no empty available
-            while(returnList.isEmpty() ){
-
-                List<Double> keys = new ArrayList(map.keySet());
-                double min = Double.MAX_VALUE;
-
-                double min_i = -1;
-                for(double i: keys){
-                    double distance = Math.abs(i - checkSet.getImpactFactor());
-                    if (distance < min){
-                        min = distance;
-                        min_i = i;
-                    }
-                }
-                if(min_i>=0){
-                    for(TaskSet set: map.get(min_i)){
-                        if(set.getTaskList().size() < clusters_size){
-                            returnList.add(set);
-                        }
-                    }
-                }else{
-                    return null;
-                }
-                map.remove(min_i);
-            }
+    public double getAverageCores(List<TaskSet> set){
+        double total = 0;
+        for(TaskSet taskSet: set){
+            total+=taskSet.getTaskList().get(0).getCores();
         }
-        return returnList;
-
+        return total/set.size();
     }
 
 
@@ -200,13 +217,13 @@ public class HorizontalResourceAwareBalancing extends BalancingMethod {
      */
     protected TaskSet getCandidateTastSet(List<TaskSet> taskList,
                                           TaskSet checkSet,
-                                          int clusters_size) {
+                                          int clusters_size, double coreAvg, double runtimeAvg) {
 
 
 
         List<TaskSet> potential = null;
         try{
-            potential=getNextPotentialTaskSets(taskList, checkSet,  clusters_size);
+            potential=getNextPotentialTaskSets(taskList, checkSet,  clusters_size, coreAvg, runtimeAvg);
         }catch (Exception e)
         {
             e.printStackTrace();
@@ -225,5 +242,30 @@ public class HorizontalResourceAwareBalancing extends BalancingMethod {
         } else {
             return taskList.get(0);
         }
+    }
+
+    public double calculateCoreHourWastage(List<TaskSet> jobList){
+
+        double coreHourWastage = 0;
+        for (TaskSet cluster : jobList){
+            List<Task> tasks = cluster.getTaskList();
+            sortListDecreasingByCores(tasks);
+            double maxCores = tasks.get(0).getCores();
+            for (Task tsk : tasks){
+                coreHourWastage += tsk.getCloudletLength() * (maxCores - tsk.getCores());
+            }
+        }
+        return coreHourWastage;
+
+    }
+
+    public void sortListDecreasingByCores(List<Task> job){
+        Collections.sort(job, new Comparator<Task>() {
+            @Override
+            public int compare(Task t1, Task t2) {
+                //Decreasing order
+                return (int) (t2.getCores() - t1.getCores());
+            }
+        });
     }
 }
