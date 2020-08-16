@@ -263,7 +263,7 @@ public class HorizontalImpactBalancing extends BalancingMethod {
             sortListDecreasingByCores(tasks);
             double maxCores = tasks.get(0).getCores();
             for (Task tsk : tasks){
-                coreHourWastage += tsk.getCloudletLength() * (maxCores - tsk.getCores());
+                coreHourWastage += tsk.getExecTime() * (maxCores - tsk.getCores());
             }
         }
         return coreHourWastage;

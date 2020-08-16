@@ -37,6 +37,8 @@ public class HorizontalResourceAwareBalancing extends BalancingMethod {
      */
     public void process(List<TaskSet> taskList) {
 
+        normalizeCores(taskList);
+        normalizeRunTime(taskList);
         if (taskList.size() > getClusterNum()) {
             List<TaskSet> jobList = new ArrayList<>();
             for (int i = 0; i < getClusterNum(); i++) {
@@ -48,10 +50,7 @@ public class HorizontalResourceAwareBalancing extends BalancingMethod {
             }
             double coreAvg = getAverageCores(taskList);
             double runtimeAvg = getAverageRunTime(taskList);
-            sortListDecreasing(taskList);
             for (TaskSet set : taskList) {
-                //sortListIncreasing(jobList);
-                //Log.printLine(set.getJobRuntime());
                 TaskSet job = null;
                 try{
                     job = getCandidateTastSet(jobList, set, clusters_size, coreAvg, runtimeAvg);
@@ -124,8 +123,6 @@ public class HorizontalResourceAwareBalancing extends BalancingMethod {
     private List<TaskSet> getNextPotentialTaskSets(List<TaskSet> taskList,
                                                    TaskSet checkSet, int clusters_size, double coreAvg, double runtimeAvg){
 
-        Map<Double, List<TaskSet>> map = new HashMap<>();
-
         Map<Double, List<TaskSet>> testMap = getClusteringFactors(taskList, checkSet, coreAvg, runtimeAvg);
 
         List<Double> facKeys = new ArrayList<Double>(testMap.keySet());
@@ -156,7 +153,7 @@ public class HorizontalResourceAwareBalancing extends BalancingMethod {
         Map<Double, List<TaskSet>> map = new HashMap<>();
         Task task = taskSet.getTaskList().get(0);
         for(TaskSet set: clusters){
-            double factor = (0.1 * Math.abs(task.getCores()-getMaxCore(set, coreAvg))) * (0.1 * Math.abs(task.getCloudletLength()-getTotalRunTime(set, runtimeAvg)));
+            double factor = (0.1 + Math.abs(task.getNormalizedCores()-getMaxCore(set, coreAvg))) * (0.1 + Math.abs(task.getNormalizedRunTime()-getTotalRunTime(set, runtimeAvg)));
             if(!map.containsKey(factor)){
                 map.put(factor, new ArrayList<>());
             }
@@ -172,19 +169,21 @@ public class HorizontalResourceAwareBalancing extends BalancingMethod {
     private double getTotalRunTime(TaskSet set, double runtimeAvg){
         double totalRunTime = runtimeAvg;
         if(set.getTaskList()!=null){
+            totalRunTime = 0;
             for(Task task: set.getTaskList()){
-                totalRunTime+=task.getCloudletLength();
+                totalRunTime+=task.getNormalizedRunTime();
             }
         }
-        return totalRunTime/1000;
+        return totalRunTime;
     }
 
     private double getMaxCore(TaskSet set, double coreAvg){
         double cores = coreAvg;
         if(set.getTaskList()!=null){
+            cores = 0;
             for (Task task: set.getTaskList()){
-                if(cores<task.getCores()){
-                    cores = task.getCores();
+                if(cores<task.getNormalizedCores()){
+                    cores = task.getNormalizedCores();
                 }
             }
         }
@@ -194,7 +193,7 @@ public class HorizontalResourceAwareBalancing extends BalancingMethod {
     public double getAverageRunTime(List<TaskSet> set){
         double total = 0;
         for(TaskSet taskSet: set){
-            total+=taskSet.getTaskList().get(0).getCloudletLength();
+            total+=taskSet.getTaskList().get(0).getNormalizedRunTime();
         }
         return total/set.size();
     }
@@ -202,7 +201,7 @@ public class HorizontalResourceAwareBalancing extends BalancingMethod {
     public double getAverageCores(List<TaskSet> set){
         double total = 0;
         for(TaskSet taskSet: set){
-            total+=taskSet.getTaskList().get(0).getCores();
+            total+=taskSet.getTaskList().get(0).getNormalizedCores();
         }
         return total/set.size();
     }
@@ -252,7 +251,7 @@ public class HorizontalResourceAwareBalancing extends BalancingMethod {
             sortListDecreasingByCores(tasks);
             double maxCores = tasks.get(0).getCores();
             for (Task tsk : tasks){
-                coreHourWastage += tsk.getCloudletLength() * (maxCores - tsk.getCores());
+                coreHourWastage += tsk.getExecTime() * (maxCores - tsk.getCores());
             }
         }
         return coreHourWastage;
@@ -268,4 +267,66 @@ public class HorizontalResourceAwareBalancing extends BalancingMethod {
             }
         });
     }
+
+    public double getMaxRunTime(List<TaskSet> set){
+        double max = set.get(0).getTaskList().get(0).getExecTime();
+        for(TaskSet taskSet: set){
+            if(taskSet.getTaskList().get(0).getExecTime()>max){
+                max = taskSet.getTaskList().get(0).getExecTime();
+            }
+        }
+        return max;
+    }
+
+    public double getMinRunTime(List<TaskSet> set){
+        double min = set.get(0).getTaskList().get(0).getExecTime();
+        for(TaskSet taskSet: set){
+            if(taskSet.getTaskList().get(0).getExecTime()<min){
+                min = taskSet.getTaskList().get(0).getExecTime();
+            }
+        }
+        return min;
+    }
+
+    public double getMaxCores(List<TaskSet> set){
+        double max = set.get(0).getTaskList().get(0).getCores();
+        for(TaskSet taskSet: set){
+            if(taskSet.getTaskList().get(0).getCores()>max){
+                max = taskSet.getTaskList().get(0).getCores();
+            }
+        }
+        return max;
+    }
+
+    public double getMinCores(List<TaskSet> set){
+        double min = set.get(0).getTaskList().get(0).getCores();
+        for(TaskSet taskSet: set){
+            if(taskSet.getTaskList().get(0).getCores()<min){
+                min = taskSet.getTaskList().get(0).getCores();
+            }
+        }
+        return min;
+    }
+
+    public void normalizeRunTime(List<TaskSet> set){
+        double max = getMaxRunTime(set);
+        double min = getMinRunTime(set);
+
+        for(TaskSet taskSet: set){
+            double normalizedRunTime = (taskSet.getTaskList().get(0).getExecTime()-min)/(max-min);
+            taskSet.getTaskList().get(0).setNormalizedRunTime(normalizedRunTime);
+        }
+
+    }
+
+    public void normalizeCores(List<TaskSet> set){
+        double max = getMaxCores(set);
+        double min = getMinCores(set);
+
+        for(TaskSet taskSet: set){
+            double normalizedCores = (taskSet.getTaskList().get(0).getCores()-min)/(max-min);
+            taskSet.getTaskList().get(0).setNormalizedCores(normalizedCores);
+        }
+    }
+
 }

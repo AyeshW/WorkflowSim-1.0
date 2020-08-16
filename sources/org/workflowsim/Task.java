@@ -79,6 +79,12 @@ public class Task extends Cloudlet {
 
     private double cores;
 
+    private double execTime;
+
+    private double normalizedRunTime;
+
+    private double normalizedCores;
+
     /**
      * Allocates a new Task object. The task length should be greater than or
      * equal to 1.
@@ -320,6 +326,30 @@ public class Task extends Cloudlet {
 
     public void setCores(double cores) {
         this.cores = cores;
+    }
+
+    public double getExecTime() {
+        return execTime;
+    }
+
+    public void setExecTime(double execTime) {
+        this.execTime = execTime;
+    }
+
+    public double getNormalizedRunTime() {
+        return normalizedRunTime;
+    }
+
+    public void setNormalizedRunTime(double normalizedRunTime) {
+        this.normalizedRunTime = normalizedRunTime;
+    }
+
+    public double getNormalizedCores() {
+        return normalizedCores;
+    }
+
+    public void setNormalizedCores(double normalizedCores) {
+        this.normalizedCores = normalizedCores;
     }
 
     /**

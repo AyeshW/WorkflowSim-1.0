@@ -164,8 +164,10 @@ public final class WorkflowParser {
                             Log.printLine("Cannot find runtime for " + nodeName + ",set it to be 0");
                         }
                         double runtime;
+                        double execTime = 0;
                         if (node.getAttributeValue("runtime") != null) {
                             String nodeTime = node.getAttributeValue("runtime");
+                            execTime = Double.parseDouble(nodeTime);
                             runtime = 1000 * Double.parseDouble(nodeTime);
                             if (runtime < 100) {
                                 runtime = 100;
@@ -256,6 +258,7 @@ public final class WorkflowParser {
                         //In case of multiple workflow submission. Make sure the jobIdStartsFrom is consistent.
                         synchronized (this) {
                             task = new Task(this.jobIdStartsFrom, length, cores);
+                            task.setExecTime(execTime);
                             this.jobIdStartsFrom++;
                         }
                         task.setType(nodeType);
