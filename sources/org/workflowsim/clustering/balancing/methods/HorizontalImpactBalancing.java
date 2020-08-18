@@ -41,6 +41,9 @@ public class HorizontalImpactBalancing extends BalancingMethod {
      * @param taskMap the task map
      * @param clusterNum the clusters.num
      */
+
+    private static double wastage = 0;
+
     public HorizontalImpactBalancing(Map levelMap, Map taskMap, int clusterNum) {
         super(levelMap, taskMap, clusterNum);
     }
@@ -54,7 +57,7 @@ public class HorizontalImpactBalancing extends BalancingMethod {
         for (List<TaskSet> taskList : map.values()) {
             process(taskList);
         }
-
+        System.out.println("Resource wastage "+wastage);
     }
 
     /**
@@ -90,8 +93,7 @@ public class HorizontalImpactBalancing extends BalancingMethod {
                     getTaskMap().put(task, job);//this is enough
                 }
             }
-            System.out.println(".....................");
-            System.out.println(calculateCoreHourWastage(jobList));
+            wastage += calculateCoreHourWastage(jobList);
             taskList.clear();
         } 
     }

@@ -15,6 +15,8 @@ public class HorizontalResourceAwareBalancing extends BalancingMethod {
      * @param taskMap the task map
      * @param clusterNum the clusters.num
      */
+    private static double wastage = 0;
+
     public HorizontalResourceAwareBalancing(Map levelMap, Map taskMap, int clusterNum) {
         super(levelMap, taskMap, clusterNum);
     }
@@ -28,7 +30,7 @@ public class HorizontalResourceAwareBalancing extends BalancingMethod {
         for (List<TaskSet> taskList : map.values()) {
             process(taskList);
         }
-
+        System.out.println("Resource wastage "+wastage);
     }
 
     /**
@@ -65,8 +67,7 @@ public class HorizontalResourceAwareBalancing extends BalancingMethod {
                     getTaskMap().put(task, job);//this is enough
                 }
             }
-            System.out.println(".....................");
-            System.out.println(calculateCoreHourWastage(jobList));
+            wastage += calculateCoreHourWastage(jobList);
             taskList.clear();
         }
     }

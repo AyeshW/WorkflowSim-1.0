@@ -40,6 +40,8 @@ public class HorizontalRuntimeBalancing extends BalancingMethod {
      * @param taskMap the task map
      * @param clusterNum the clustes.num
      */
+    private static double wastage = 0;
+
     public HorizontalRuntimeBalancing(Map levelMap, Map taskMap, int clusterNum) {
         super(levelMap, taskMap, clusterNum);
     }
@@ -64,7 +66,6 @@ public class HorizontalRuntimeBalancing extends BalancingMethod {
                     jobList.add(new TaskSet());
                 }
                 sortListDecreasing(taskList);
-                coreHrsWastage += calculateCoreHourWastage(new ArrayList<TaskSet>(taskList));
                 for (TaskSet set : taskList) {
                     //MinHeap is required 
                     sortListIncreasing(jobList);
@@ -76,7 +77,7 @@ public class HorizontalRuntimeBalancing extends BalancingMethod {
                     }
 
                 }
-
+                wastage += calculateCoreHourWastage(jobList);
                 taskList.clear();//you sure?
             } else {
                 //do nothing since 
@@ -84,8 +85,7 @@ public class HorizontalRuntimeBalancing extends BalancingMethod {
 
 
         }
-        System.out.println(".........................................");
-        System.out.println(coreHrsWastage);
+        System.out.println("Resource wastage "+wastage);
     }
     /**
      * Sort taskSets based on their runtime
@@ -117,27 +117,19 @@ public class HorizontalRuntimeBalancing extends BalancingMethod {
 
     }
 
-    public double calculateCoreHourWastage(List<TaskSet> jobs){
-        List<TaskSet> jobList = new ArrayList<>();
-        for (int i = 0; i < getClusterNum(); i++) {
-            jobList.add(new TaskSet());
-        }
-        for (TaskSet set : jobs) {
-            //MinHeap is required
-            sortListIncreasing(jobList);
-            TaskSet job = (TaskSet) jobList.get(0);
-            job.addTask(set.getTaskList());
-        }
+    public double calculateCoreHourWastage(List<TaskSet> jobList){
+
         double coreHourWastage = 0;
         for (TaskSet cluster : jobList){
             List<Task> tasks = cluster.getTaskList();
             sortListDecreasingByCores(tasks);
             double maxCores = tasks.get(0).getCores();
             for (Task tsk : tasks){
-                coreHourWastage += tsk.getCloudletLength() * (maxCores - tsk.getCores());
+                coreHourWastage += tsk.getExecTime() * (maxCores - tsk.getCores());
             }
         }
         return coreHourWastage;
+
     }
 
     public void sortListDecreasingByCores(List<Task> job){
