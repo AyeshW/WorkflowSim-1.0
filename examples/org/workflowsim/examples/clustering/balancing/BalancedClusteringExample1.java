@@ -58,7 +58,7 @@ public class BalancedClusteringExample1 extends HorizontalClusteringExample1 {
              *
              */
             String code = "r";
-            String daxPath = "/Users/randika/Documents/WorkflowSim-1.0/config/dax/CyberShake_30.xml";
+            String daxPath = "/Users/randika/Documents/WorkflowSim-1.0/config/dax/cores/CyberShake_30.xml";
             double c_delay = 0.0, q_delay = 0.0, e_delay = 0.0, p_delay = 0.0;
             int interval = 0;
 

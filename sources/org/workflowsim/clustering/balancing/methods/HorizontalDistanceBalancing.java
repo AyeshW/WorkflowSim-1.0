@@ -17,12 +17,8 @@
  */
 package org.workflowsim.clustering.balancing.methods;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import org.workflowsim.Task;
 import org.workflowsim.clustering.TaskSet;
 
@@ -43,6 +39,9 @@ public class HorizontalDistanceBalancing extends HorizontalImpactBalancing {
      * @param taskMap the task map
      * @param clusterNum the clusters.num
      */
+
+    private static double wastage = 0;
+
     public HorizontalDistanceBalancing(Map levelMap, Map taskMap, int clusterNum) {
         super(levelMap, taskMap, clusterNum);
     }
@@ -56,7 +55,7 @@ public class HorizontalDistanceBalancing extends HorizontalImpactBalancing {
         for (List<TaskSet> taskList : map.values()) {
             process(taskList);
         }
-
+        System.out.println("Resource wastage "+wastage);
     }
 
     /**
@@ -92,8 +91,7 @@ public class HorizontalDistanceBalancing extends HorizontalImpactBalancing {
                     //impact factor is not updated
                 }
             }
-            System.out.println(".....................");
-            System.out.println(calculateCoreHourWastage(jobList));
+            wastage += calculateCoreHourWastage(jobList);
             taskList.clear();//you sure?
         }
     }
@@ -105,7 +103,7 @@ public class HorizontalDistanceBalancing extends HorizontalImpactBalancing {
      */
     private List<Integer> sortDistanceIncreasing(int[][] distances, int size, int num) {
         List<Integer> newList = new ArrayList<>();
-        //first two 
+        //first two
         int max = 0;
         int max_i = 0;
         int max_j = 0;
@@ -213,7 +211,7 @@ public class HorizontalDistanceBalancing extends HorizontalImpactBalancing {
     }
 
     private List<TaskSet> getNextPotentialTaskSets(List<TaskSet> taskList,
-            TaskSet checkSet, int clusters_size) {
+                                                   TaskSet checkSet, int clusters_size) {
         int dis = Integer.MAX_VALUE;
 
         Map<Integer, List<TaskSet>> map = new HashMap<>();
@@ -277,8 +275,8 @@ public class HorizontalDistanceBalancing extends HorizontalImpactBalancing {
      * @return
      */
     protected TaskSet getCandidateTastSet(ArrayList<TaskSet> taskList,
-            TaskSet checkSet,
-            int clusters_size) {
+                                          TaskSet checkSet,
+                                          int clusters_size) {
 
         List<TaskSet> potential = getNextPotentialTaskSets(taskList, checkSet, clusters_size);
         TaskSet task = null;
@@ -352,8 +350,6 @@ public class HorizontalDistanceBalancing extends HorizontalImpactBalancing {
 
         return distance * 2;
     }
-
-
 }
 /*
  * An abstracion of Distance
